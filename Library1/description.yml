@@ -1,0 +1,224 @@
+openapi: 3.0.0
+info:
+  title: Library API
+  description: API for managing books and lending operations in a library
+  version: 1.0.0
+
+paths:
+  /books:
+    get:
+      summary: Get all books
+      description: Retrieves all books in the library
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Book'
+
+    post:
+      summary: Add a book
+      description: Adds a new book to the library
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Book'
+      responses:
+        '201':
+          description: Book created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Book'
+        '422':
+          description: Invalid input
+
+  /books/{isbn}:
+    get:
+      summary: Get book details
+      description: Retrieves the details of a specific book
+      parameters:
+        - in: path
+          name: isbn
+          description: ISBN of the book
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Book'
+        '404':
+          description: Book not found
+
+    put:
+      summary: Update a book
+      description: Updates the details of a specific book
+      parameters:
+        - in: path
+          name: isbn
+          description: ISBN of the book
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Book'
+      responses:
+        '200':
+          description: Book updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Book'
+        '404':
+          description: Book not found
+
+    delete:
+      summary: Delete a book
+      description: Deletes a specific book from the library
+      parameters:
+        - in: path
+          name: isbn
+          description: ISBN of the book
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Book deleted successfully
+        '404':
+          description: Book not found
+
+  /lends:
+    get:
+      summary: Get all lends
+      description: Retrieves all lends in the library
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Lend'
+
+    post:
+      summary: Create a lend
+      description: Creates a new lend for a book
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Lend'
+      responses:
+        '201':
+          description: Lend created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Lend'
+        '404':
+          description: Book not found
+        '422':
+          description: Invalid input
+
+  /lends/{id}:
+    get:
+      summary: Get lend details
+      description: Retrieves the details of a specific lend
+      parameters:
+        - in: path
+          name: id
+          description: ID of the lend
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Lend'
+        '404':
+          description: Lend not found
+
+    patch:
+      summary: Update a lend
+      description: Updates the details of a specific lend
+      parameters:
+        - in: path
+          name: id
+          description: ID of the lend
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Lend'
+      responses:
+        '200':
+          description: Lend updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Lend'
+        '404':
+          description: Lend not found
+
+components:
+  schemas:
+    Book:
+      type: object
+      properties:
+        isbn:
+          type: integer
+        title:
+          type: string
+        year:
+          type: integer
+        author:
+          type: string
+      required:
+        - isbn
+        - title
+        - year
+        - author
+
+    Lend:
+      type: object
+      properties:
+        id:
+          type: integer
+        customer_id:
+          type: integer
+        isbn:
+          type: integer
+        borrowed_at:
+          type: string
+          format: date
+        returned_at:
+          type: string
+          format: date
+      required:
+        - customer_id
+        - isbn
+        - borrowed_at
+        - returned_at
