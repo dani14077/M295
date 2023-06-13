@@ -13,18 +13,21 @@ app.use(session({
     cookie: {}
 }));
 
+// Die Test Dateien
 let tasks = [
     {id: 1, title: "Call Client", description: "Schedule a phone call with the client to discuss project updates", done: false, dueDate: new Date("2023-06-15").toLocaleDateString("de-CH")},
     {id: 2, title: "Send Meeting Agenda", description: "Email the meeting agenda to all participants before the scheduled team meeting.", done: false, dueDate: new Date("2023-06-17").toLocaleDateString("de-CH")},
     {id: 3, title: "Update Sales Spreadsheet", description: "Enter the latest sales data into the spreadsheet and calculate total revenue.", done: false, dueDate: new Date("2023-06-20").toLocaleDateString("de-CH")},
     {id: 4, title: "Review Website Content", description: "Proofread and review the content on the company's website for any errors or outdated information.", done: false, dueDate: new Date("2023-06-22").toLocaleDateString("de-CH")},
     {id: 5, title: "Purchase Office Supplies", description: "Place an order for necessary office supplies like stationery and printer ink.", done: false, dueDate: new Date("2023-06-25").toLocaleDateString("de-CH")}
-]
+];
 
+// Alle Tasks hollen
 app.get('/tasks', isAuthenticated, (req, res) => {
     res.json(tasks).status(200)
 });
 
+// Task bei id hollen
 app.get('/tasks/:id', isAuthenticated, (req, res) => {
     const id = req.params.id;
     const task = tasks.find((task) => task.id === parseInt(id));
@@ -36,6 +39,7 @@ app.get('/tasks/:id', isAuthenticated, (req, res) => {
     }
 });
 
+// Ein neuen Task erstellen
 app.post('/tasks', isAuthenticated, (req, res) => {
     const newTask = {
         id: tasks.length + 1,
@@ -52,6 +56,7 @@ app.post('/tasks', isAuthenticated, (req, res) => {
     res.status(201).json(newTask);
 });
 
+//Einen Task aktualisieren
 app.put('/tasks/:id', isAuthenticated, (req, res) => {
     const id = req.params.id;
     const taskIndex = tasks.findIndex((task) => task.id === parseInt(id));
@@ -64,6 +69,7 @@ app.put('/tasks/:id', isAuthenticated, (req, res) => {
     }
 });
 
+//Einen Task löschen
 app.delete('/tasks/:id', isAuthenticated, (req, res) => {
     const id = req.params.id;
     const taskIndex = tasks.findIndex((task) => task.id === parseInt(id));
@@ -76,10 +82,11 @@ app.delete('/tasks/:id', isAuthenticated, (req, res) => {
     }
 });
 
+//sich einzuloggen
 app.post('/login', function (req, res) {
     const { email, password } = req.body;
 
-    if (!email || !email.includes("@")) {
+    if (!email || !email.includes("@") || !email.includes(".")) {
         return res.status(401).json({ error: "Invalid email" });
       }
 
@@ -91,6 +98,7 @@ app.post('/login', function (req, res) {
     return res.status(401).json({ error: "Invalid credentials" });
 });
 
+// sich zu verifizieren
 app.get('/verify', function (req, res) {
     if (req.session.authenticated) {
         return res.status(200).json({ email: req.session.email })
@@ -98,12 +106,14 @@ app.get('/verify', function (req, res) {
     return res.status(401).json({ error: "Not logged in" })
 });
 
+// sich auszuloggen
 app.delete('/logout', function (req, res) {
     req.session.authenticated = false;
     delete req.session.email;
     return res.sendStatus(204);
 });
 
+// Funktion zur Überprüfung der Authentifizierung
 function isAuthenticated(req, res, next) {
     if (req.session.authenticated) {
       next();
@@ -112,6 +122,7 @@ function isAuthenticated(req, res, next) {
     }
 };
 
+//Wenn der Endpoint nicht mit dem Endpukten stimmen
 app.use((req, res) => {
     res.status(404).json({ error: "The endpoint could not be found" });
 });
