@@ -40,6 +40,18 @@ app.post('/tasks', (req, res) => {
     res.status(201).json(newTask);
 });
 
+app.put('/tasks/:id', (req, res) => {
+    const id = req.params.id;
+    const taskIndex = tasks.findIndex((task) => task.id === parseInt(id));
+
+    if (taskIndex !== -1) {
+        tasks[taskIndex] = {...tasks[taskIndex], ...req.body };
+        res.json(tasks[taskIndex]).status(201);
+    } else {
+        res.status(404).send("Task not found");
+    }
+});
+
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
 });
