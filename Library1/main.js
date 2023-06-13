@@ -1,9 +1,17 @@
 const express = require("express");
+const session = require('express-session')
 const app = express();
 const port = 3000;
 const bodyParser = require('body-parser');
 
 app.use(bodyParser.json());
+
+app.use(session({
+    secret: 'supersecret',
+    resave: false,
+    saveUninitialized: true,
+    cookie: {}
+}));
 
 let books = [
     {isbn: 1, title: "Titanic", year: 1932, author: "Hans Peter"},
@@ -77,12 +85,12 @@ app.delete('/books/:isbn', (req, res) => {
 
 
 // Get all lends
-app.get('/lends', (req, res) => {
+app.get('/lends', isAuthenticated, (req, res) => {
   res.json(lends);
 });
 
 // Get a specific lend by ID
-app.get('/lends/:id', (req, res) => {
+app.get('/lends/:id', isAuthenticated, (req, res) => {
   const lendId = req.params.id;
   const lend = lends.find((l) => l.id === parseInt(lendId));
 
@@ -94,7 +102,7 @@ app.get('/lends/:id', (req, res) => {
 });
 
 // Create a new lend
-app.post('/lends', (req, res) => {
+app.post('/lends', isAuthenticated, (req, res) => {
   const lendData = req.body;
   const book = books.find((b) => b.isbn === lendData.isbn);
 
@@ -128,7 +136,7 @@ app.post('/lends', (req, res) => {
 });
 
 // Update a lend by ID
-app.patch('/lends/:id', (req, res) => {
+app.patch('/lends/:id', isAuthenticated, (req, res) => {
   const lendId = req.params.id;
   const lendUpdates = req.body;
   const lend = lends.find((l) => l.id === parseInt(lendId));
@@ -143,6 +151,40 @@ app.patch('/lends/:id', (req, res) => {
   lend.returned_at = lendUpdates.returned_at || lend.returned_at;
 
   res.json(lend);
+});
+
+function isAuthenticated(req, res, next) {
+    if (req.session.authenticated) {
+      next();
+    } else {
+      res.status(401).json({ error: 'Not logged in' });
+    }
+}
+
+const secretAdminCredentials = { email: "desk@library.example", password: "m295" }
+
+app.post('/login', function (req, res) {
+    const { email, password } = req.body;
+
+    if (email .toLowerCase() === secretAdminCredentials.email & password === secretAdminCredentials.password) {
+        req.session.authenticated = true;
+        req.session.email = email;
+        return res.status(200).json({ email: req.session.email })
+    }
+    return res.status(401).json({ error: "Invalid credentials" });
+});
+
+app.get('/verify', function (req, res) {
+    if (req.session.authenticated) {
+        return res.status(200).json({ email: req.session.email })
+    }
+    return res.status(401).json({ error: "Not logged in" })
+});
+
+app.delete('/logout', function (req, res) {
+    req.session.authenticated = false;
+    delete req.session.email;
+    return res.sendStatus(204);
 });
 
 app.listen(port, () => {
