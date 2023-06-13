@@ -1,13 +1,13 @@
 const express = require("express");
-const session = require('express-session')
+const session = require("express-session")
 const app = express();
 const port = 3000;
-const bodyParser = require('body-parser');
+const bodyParser = require("body-parser");
 
 app.use(bodyParser.json());
 
 app.use(session({
-    secret: 'supersecret',
+    secret: "supersecret",
     resave: false,
     saveUninitialized: true,
     cookie: {}
@@ -79,8 +79,8 @@ app.delete('/tasks/:id', isAuthenticated, (req, res) => {
 app.post('/login', function (req, res) {
     const { email, password } = req.body;
 
-    if (!email || !email.includes('@')) {
-        return res.status(401).json({ error: 'Invalid email' });
+    if (!email || !email.includes("@")) {
+        return res.status(401).json({ error: "Invalid email" });
       }
 
     if (email && password === "m295") {
@@ -108,9 +108,14 @@ function isAuthenticated(req, res, next) {
     if (req.session.authenticated) {
       next();
     } else {
-      res.status(401).json({ error: 'Not logged in' });
+      res.status(401).json({ error: "Not logged in" });
     }
-}
+};
+
+app.use((req, res) => {
+    res.status(404).json({ error: "The endpoint could not be found" });
+});
+
 
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
