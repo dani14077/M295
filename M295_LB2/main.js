@@ -52,6 +52,18 @@ app.put('/tasks/:id', (req, res) => {
     }
 });
 
+app.delete('/tasks/:id', (req, res) => {
+    const id = req.params.id;
+    const taskIndex = tasks.findIndex((task) => task.id === parseInt(id));
+
+    if (taskIndex !== -1){
+        const deletedTask = tasks.splice(taskIndex, 1);
+        res.json(deletedTask[0]).status(204);
+    } else {
+        res.status(404).send("Task not found.")
+    }
+});
+
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
 });
