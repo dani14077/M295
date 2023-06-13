@@ -42,10 +42,10 @@ app.post('/tasks', isAuthenticated, (req, res) => {
         title: req.body.title,
         description: req.body.description,
         done: false,
-        due: req.body.due
+        dueDate: req.body.due
     };
 
-    if (!title) {
+    if (!newTask.title) {
         return res.status(406).json({ error: 'Title cannot be empty' });
     };
     tasks.push(newTask);
