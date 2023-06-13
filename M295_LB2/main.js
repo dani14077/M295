@@ -1,9 +1,17 @@
 const express = require("express");
+const session = require('express-session')
 const app = express();
 const port = 3000;
 const bodyParser = require('body-parser');
 
 app.use(bodyParser.json());
+
+app.use(session({
+    secret: 'supersecret',
+    resave: false,
+    saveUninitialized: true,
+    cookie: {}
+}));
 
 let tasks = [
     {id: 1, title: "Call Client", description: "Schedule a phone call with the client to discuss project updates", done: false, dueDate: new Date("2023-06-15").toLocaleDateString("de-CH")},
@@ -13,11 +21,11 @@ let tasks = [
     {id: 5, title: "Purchase Office Supplies", description: "Place an order for necessary office supplies like stationery and printer ink.", done: false, dueDate: new Date("2023-06-25").toLocaleDateString("de-CH")}
 ]
 
-app.get('/tasks', (req, res) => {
+app.get('/tasks', isAuthenticated, (req, res) => {
     res.json(tasks).status(200)
 });
 
-app.get('/tasks/:id', (req, res) => {
+app.get('/tasks/:id', isAuthenticated, (req, res) => {
     const id = req.params.id;
     const task = tasks.find((task) => task.id === parseInt(id));
 
@@ -28,7 +36,7 @@ app.get('/tasks/:id', (req, res) => {
     }
 });
 
-app.post('/tasks', (req, res) => {
+app.post('/tasks', isAuthenticated, (req, res) => {
     const newTask = {
         id: tasks.length + 1,
         title: req.body.title,
@@ -36,11 +44,15 @@ app.post('/tasks', (req, res) => {
         done: false,
         due: req.body.due
     };
+
+    if (!title) {
+        return res.status(406).json({ error: 'Title cannot be empty' });
+    };
     tasks.push(newTask);
     res.status(201).json(newTask);
 });
 
-app.put('/tasks/:id', (req, res) => {
+app.put('/tasks/:id', isAuthenticated, (req, res) => {
     const id = req.params.id;
     const taskIndex = tasks.findIndex((task) => task.id === parseInt(id));
 
@@ -52,7 +64,7 @@ app.put('/tasks/:id', (req, res) => {
     }
 });
 
-app.delete('/tasks/:id', (req, res) => {
+app.delete('/tasks/:id', isAuthenticated, (req, res) => {
     const id = req.params.id;
     const taskIndex = tasks.findIndex((task) => task.id === parseInt(id));
 
@@ -63,6 +75,42 @@ app.delete('/tasks/:id', (req, res) => {
         res.status(404).send("Task not found.")
     }
 });
+
+app.post('/login', function (req, res) {
+    const { email, password } = req.body;
+
+    if (!email || !email.includes('@')) {
+        return res.status(401).json({ error: 'Invalid email' });
+      }
+
+    if (email && password === "m295") {
+        req.session.authenticated = true;
+        req.session.email = email;
+        return res.status(200).json({ message: "Log in successful"})
+    }
+    return res.status(401).json({ error: "Invalid credentials" });
+});
+
+app.get('/verify', function (req, res) {
+    if (req.session.authenticated) {
+        return res.status(200).json({ email: req.session.email })
+    }
+    return res.status(401).json({ error: "Not logged in" })
+});
+
+app.delete('/logout', function (req, res) {
+    req.session.authenticated = false;
+    delete req.session.email;
+    return res.sendStatus(204);
+});
+
+function isAuthenticated(req, res, next) {
+    if (req.session.authenticated) {
+      next();
+    } else {
+      res.status(401).json({ error: 'Not logged in' });
+    }
+}
 
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
