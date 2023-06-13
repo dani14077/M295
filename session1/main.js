@@ -22,7 +22,7 @@ app.get('/name', (request, response) => {
     if (name) {
         response.send(name);
     } else {
-        response.sendStatus(404);
+        response.send("Couldn't find requested name").status(404);
     }
 });
 
@@ -31,12 +31,12 @@ app.post('/name', (request, response) => {
 
     request.session.name = name
 
-    response.sendStatus(200);
+    response.send("Success").status(200);
 });
 
 app.delete('/name', (request, response) => {
     delete request.session.name;
-    response.sendStatus(204);
+    response.send("Successfully Deleted").status(204);
 });
 
 app.listen(port, () => {
