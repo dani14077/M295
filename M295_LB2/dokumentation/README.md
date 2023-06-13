@@ -24,4 +24,6 @@ Um sie zu installieren, führen Sie im Terminal den Befehl `npm install --save e
 
 **Auf keinen der oben genannten Endpunkte kann ohne Anmeldung zugegriffen werden**
 
+Link zu meinen Git Repo: [Github](https://github.com/dani14077/M295)
+
 **Author:** *Daniel Boulter*
